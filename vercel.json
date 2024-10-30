@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/api/upload",
+      "methods": ["POST"],
+      "dest": "/api/upload.js"
+    },
+    {
+      "src": "/api/file/:id",
+      "methods": ["GET"],
+      "dest": "/api/file/[id].js"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
+    }
+  ]
+}

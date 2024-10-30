@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vercel-Telegram文件上传</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+  <div id="app" class="container mx-auto px-4 py-8">
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
+      <h1 class="text-2xl font-bold text-center mb-6">Vercel-Telegram文件上传</h1>
+
+      <div class="space-y-4">
+        <div class="flex justify-center">
+          <label class="w-full flex flex-col items-center px-4 py-6 bg-white rounded-lg shadow-lg tracking-wide border border-blue-500 cursor-pointer hover:bg-blue-500 hover:text-white">
+            <svg class="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
+            </svg>
+            <span class="mt-2 text-sm">选择文件上传</span>
+            <input type="file" class="hidden" @change="handleFileChange" accept="image/*,video/*,audio/*" ref="fileInput">
+          </label>
+        </div>
+
+        <div v-if="file" class="text-sm text-gray-600">
+          已选择: {{ file.name }}
+        </div>
+
+        <div v-if="uploading" class="text-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+          <p class="mt-2 text-sm text-gray-600">上传中...</p>
+        </div>
+
+        <div v-if="uploadResult" :class="uploadResult.ok ? 'text-green-600' : 'text-red-600'" class="text-center">
+          {{ uploadResult.message }}
+        </div>
+
+        <button
+          @click="uploadFile"
+          :disabled="!file || uploading"
+          class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          上传
+        </button>
+
+        <!-- 上传文件列表 -->
+        <div v-if="uploadedFiles.length" class="mt-6">
+          <h2 class="text-lg font-semibold mb-2">已上传文件</h2>
+          <ul class="space-y-2">
+            <li v-for="(item, index) in uploadedFiles" :key="index" class="text-sm">
+              <a :href="item.url" target="_blank" class="text-blue-500 hover:text-blue-700 hover:underline">
+                {{ item.name }}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref } = Vue
+
+    createApp({
+      setup() {
+        const file = ref(null)
+        const uploading = ref(false)
+        const uploadResult = ref(null)
+        const uploadedFiles = ref([])
+        const fileInput = ref(null)
+
+        const handleFileChange = (e) => {
+          const selectedFile = e.target.files[0]
+          if (selectedFile) {
+            file.value = selectedFile
+            uploadResult.value = null
+          }
+        }
+
+        const resetForm = () => {
+          file.value = null
+          uploadResult.value = null
+          if (fileInput.value) {
+            fileInput.value.value = ''
+          }
+        }
+
+        const uploadFile = async () => {
+          if (!file.value) return
+
+          uploading.value = true
+          uploadResult.value = null
+
+          const formData = new FormData()
+          formData.append('file', file.value)
+
+          try {
+            const response = await fetch('/api/upload', {
+              method: 'POST',
+              body: formData
+            })
+            const result = await response.json()
+            let message = result.code === 0 ? '上传成功！' : (result.error || '上传失败')
+
+            uploadResult.value = {
+              ok: result.code === 0,
+              message: message
+            }
+
+            if (result.code === 0) {
+              uploadedFiles.value.unshift({
+                name: file.value.name,
+                url: result.url
+              })
+              resetForm()
+            }
+          } catch (error) {
+            uploadResult.value = {
+              ok: false,
+              message: '上传出错：' + error.message
+            }
+          } finally {
+            uploading.value = false
+          }
+        }
+
+        return {
+          file,
+          uploading,
+          uploadResult,
+          uploadedFiles,
+          fileInput,
+          handleFileChange,
+          uploadFile
+        }
+      }
+    }).mount('#app')
+  </script>
+  <script async defer src="https://tongji.linkroutes.com/script.js" data-website-id="f41ddf8b-871a-4969-9afb-ec254a58786b"></script>
+</body>
+</html>
