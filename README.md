@@ -9,12 +9,14 @@
 - 支持防盗链设置
 - 基于 Edge Functions 的高性能响应
 - 支持文件缓存
+- 对webp/png/gif的上传进行文件还原处理 (默认情况下传上去都是jpg)
 
 ## 环境变量配置
 
 需要在 `.env` 文件中配置以下环境变量:
 
 ```
+#.env文件
 TG_BOT_TOKEN=  # 你的Telegram Bot Token，必填
 TG_CHAT_ID=  # 你的Telegram聊天ID，必填
 HOST=  # ACAO白名单，多个用逗号隔开，选填
@@ -30,3 +32,9 @@ REFERRER=  # 防盗链白名单，多个用逗号隔开，选填
 npm install -g vercel
 vercel dev
 ```
+
+## 部署
+- 先fork本项目
+- vercel导入项目
+- 配置环境变量 （把.env文件内容复制到vercel环境变量中）
+- 部署
