@@ -83,7 +83,7 @@ export default async function handler(req) {
       });
     }
 
-    if (!fileExt || !getMimeType(fileExt)) {
+    if (!getMimeType(fileExt)) {
       return new Response(JSON.stringify({ error: 'Invalid file extension' }), {
         status: 400,
         headers: {
