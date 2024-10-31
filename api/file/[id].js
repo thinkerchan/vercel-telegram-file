@@ -31,7 +31,8 @@ function getMimeType(ext) {
     'aac': 'audio/aac',
     'flac': 'audio/flac'
   };
-  return mimeTypes[ext.toLowerCase()] || 'application/octet-stream';
+  // return ext ? mimeTypes[ext.toLowerCase()] || 'application/octet-stream' :'';
+  return ext ? mimeTypes[ext.toLowerCase()] :'';
 }
 
 export default async function handler(req) {
@@ -75,6 +76,16 @@ export default async function handler(req) {
     if (!file_path) {
       return new Response(JSON.stringify({ error: error_message }), {
         status: 404,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+
+    if (!fileExt || !getMimeType(fileExt)) {
+      return new Response(JSON.stringify({ error: 'Invalid file extension' }), {
+        status: 400,
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
